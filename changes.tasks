@@ -1,0 +1,81 @@
+General:
+  ☐ categorize/type endpoints
+  ☐ Fix all snmp commands to include  2> /dev/null at the end for error reduction
+  ☐ Figure out what is adding endpoints in the device table
+  ☐ Figure out why there are so many dependency errrors on update_endpoint script
+  ☐ Add a script for user imports and user logons
+  ☐ Change the mac stored to be without colons or dashes or anything
+  ☐ Decide if ping_check is the last time it was seen or if it's the last time it was checked and correct the scripts
+  ☐ Fix update script to not clear out the model when it's blank
+  ☐ Add a script to check services per device
+  ☐ address the issue where the continue doesn't work in a script (interfaces script but potentially others)
+  ☐ update_user script has getting all users from AD commented out. Cron job needs to be adjusted so this can run only once a day
+  ☐ add a manual run for update_user script
+  ☐ fix the time on the user logon table and script
+  ☐ update all scripts to include ping column and ping_check column
+  ☐ find out why 'continue' is not working on the pi
+  ☐ fix log location on all scripts
+  ☐ create a services check table for all the time checks
+  ☐ change all scripts to a location of /opt/netventory
+  ☐ change all script logs to point to /opt/netventory/logs
+  ☐ change all scripts to create /opt/netventory/logs instead of $HOME/logs
+  ☐ fix update script to point to /opt/netventory
+  ☐ change installer script to point to /opt/netventory as install directory
+  ☐ change installer script to update ownership on new install directory
+  ☐ change the installer script to rsync files to install directory and delete source (remove all remnant files in instal directory)
+
+Adjust cron for the following changes:
+  ☐ update_user script needs to only run once a day at any time
+  ☐ update oui only needs to run once a month
+  ☐ fix cron script to point to /opt/netventory
+
+Categories/Types:
+  ☐ Move cleanups, categories, and types from a script into the database
+  ☐ Change client to endpoint or something better
+  ☐ Create table for categories/types
+    ☐ Include id,description,query,category,type,priority
+    ☐ Priorities for order as to when they're run
+
+
+Devices:
+  Cleanup Script:
+    ✔ change wireless to wap @done (20-11-08 14:52)
+    ✔ change category wireless to network @done (20-11-08 14:52)
+    ✔ change devices that will be moved from pc to "not like category='network'" @done (20-11-08 14:56)
+
+Endpoints:
+  ✔ Interfaces script for endpoints @done (20-11-08 15:21)
+  ☐ Views for endpoints
+  ☐ Cleanup script
+  ✔ Modify ping device to include endpoints or create a ping endpoints script @done (20-11-09 17:31)
+  ☐ Modify check snmp script to include endpoints or create a check endpoints script
+  ☐ Modify arp script to include endpoints or create a arp script for endpoints
+  ☐ Modify network discover script to include endpoints or create a network discover script for endpoints
+  
+Services Script:
+  ✔ Send all IPs as a group to nmap @done (21-04-26 07:42)
+  ✔ Get NMAP results in text or file format @done (21-04-26 07:42)
+  ✔ Iterate through lines using arrays to update the database @done (21-04-26 07:42)
+  ✔ values: open, filtered, closed @done (21-04-26 07:42)
+  nmap commands:
+    ✔ nmap -iL {file list} @done (21-04-26 07:17)
+    ✔ -n -p 123,21,22,23,389,443,445,464,53,5722,5785,636,3389 @done (21-04-26 07:17)
+    ✔ -oG {file}.gnmap @done (21-04-26 07:17)
+  File cleanup commands:
+    ✔ sed '/^#/d' @done (21-04-26 07:15)
+    ✔ sed '/Status:/d' @done (21-04-26 07:15)
+    ✔ sed 's/^Host: //g' @done (21-04-26 07:15)
+    ✔ sed 's/\s*()\s*Ports:\s*/::/g' @done (21-04-26 07:15)
+    ✔ sed 's/\([0-9]\{1,5\}\)\/\(open\|closed\|filtered\)\/[A-Za-z]*\/\/[A-Za-z0-9_ -]*[\/]*\(,\)\?\(\s*\)\?/\1_\2::/g' @done (21-04-26 07:15)
+    ✔ sed 's/::$//g' @done (21-04-26 07:15)
+    ✔ Cleanup blank lines @done (21-04-25 13:32)
+ 
+Installer script:
+
+Starter Script and Cron Schedule:
+ ☐ 0 * * * * /bin/bash $HOME/scripts/updates/update_netventory.sh
+ ☐ 0 * * * * sleep 5;/bin/bash $HOME/scripts/netventory/starter.sh &
+ ☐ */20 * * * * /bin/bash $HOME/scripts/netventory/netventory.ping.sh &
+ ☐ */20 * * * * /bin/bash $HOME/scripts/netventory/netventory.remote_connections.sh &
+ ☐ 0 3 20 * * /bin/bash $HOME/scripts/netventory/oui_update.sh &
+ ☐ 59 2 */3 * * /bin/bash $HOME/scripts/remove_locks.sh "netventory" "$HOME/scripts/tmp"

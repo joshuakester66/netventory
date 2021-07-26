@@ -1,6 +1,0 @@
-0 * * * * /bin/bash $HOME/scripts/updates/update_netventory.sh
-0 * * * * sleep 5;/bin/bash $HOME/scripts/netventory/starter.sh &
-*/20 * * * * /bin/bash $HOME/scripts/netventory/netventory.ping.sh &
-*/20 * * * * /bin/bash $HOME/scripts/netventory/netventory.remote_connections.sh &
-0 3 20 * * /bin/bash $HOME/scripts/netventory/oui_update.sh &
-59 2 */3 * * /bin/bash $HOME/scripts/remove_locks.sh "netventory" "$HOME/scripts/tmp"

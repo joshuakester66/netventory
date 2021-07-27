@@ -1,5 +1,5 @@
 #!/bin/bash
-#Filename: select_net_endpoints.sh
+#Filename: select_fdb.sh
 #Description: 
 # .bashrc alias=alias git_commit="/bin/bash ~/scripts/templates/$SCRIPT_NAME.sh"
 #Requirements:
@@ -10,7 +10,7 @@
 
 CRITERIA=$1
 
-SCRIPT_NAME="select_net_endpoints"
+SCRIPT_NAME="select_fdb"
 SCRIPT_CAT="aliases"
 
 mkdir -p $HOME/logs/$SCRIPT_CAT &> /dev/null
@@ -22,7 +22,7 @@ CREDENTIALS="$HOME/scripts/.credentials"
 DATABASE_USERNAME=$(cat $CREDENTIALS | grep mysql_username: | sed 's/mysql_username://g')
 DATABASE_PASSWORD=$(cat $CREDENTIALS | grep mysql_password: | sed 's/mysql_password://g')
 LOCAL_DATABASE="netventory"
-LOCAL_TABLE="endpoint_brief_view"
+LOCAL_TABLE="fdb_view"
 WORKING_DIR="$HOME/scripts/tmp/$SCRIPT_NAME"
 SCRIPT_DIR="$HOME/scripts/$SCRIPT_CAT"
 LOCK_FILE="$WORKING_DIR/$SCRIPT_NAME.lock"
@@ -77,7 +77,7 @@ exit $EXIT_CODE
 
 SELECT_DATABASE ()
 {
-mysql --user=$DATABASE_USERNAME --password=$DATABASE_PASSWORD --silent -e "SELECT * FROM $LOCAL_DATABASE.$LOCAL_TABLE WHERE $CRITERIA LIMIT 1000;"
+mysql --user=$DATABASE_USERNAME --password=$DATABASE_PASSWORD --silent -e "SELECT * FROM $LOCAL_DATABASE.$LOCAL_TABLE WHERE $CRITERIA;"
 }
 
 trap CTRL_C SIGINT
@@ -94,7 +94,7 @@ echo -e "`date +%b\ %d\ %Y\ %H:%M:%S`: ${CYANF}Script has been locked"${RESET} >
 
 if [[ -z "$CRITERIA" ]]
 	then
-		read -p "What's the search criteria? " CRITERIA
+		read -p "What's the search critera? " CRITERIA
 fi
 if [[ -z "$CRITERIA" ]]
 	then

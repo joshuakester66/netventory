@@ -196,11 +196,34 @@ FIRMWARE_P=$(snmpwalk -O qv -t $SNMP_TIMEOUT -v $SNMP_VERSION -c $SNMP_COMMUNITY
 SERIAL=
 SERIAL=$(snmpwalk -O qv -t $SNMP_TIMEOUT -v $SNMP_VERSION -c $SNMP_COMMUNITY $IP $OID_SERIAL | grep --color=never --invert-match '""' | head -n 1 | grep --color=never --invert-match "No Such" | grep --color=never --invert-match "no:such" | sed 's/\"//g' | sed 's/ //g' | egrep --color=never --invert-match '[Mm][Ii][Bb]')
 MANUFACTURER=
-MANUFACTURER=$(snmpwalk -O qv -t $SNMP_TIMEOUT -v $SNMP_VERSION -c $SNMP_COMMUNITY $IP $OID_MANUFACTURER | grep --color=never --invert-match '""' | head -n 1 | grep --color=never --invert-match "No Such" | grep --color=never --invert-match "no:such" | sed 's/\"//g' | egrep --color=never --invert-match '[Mm][Ii][Bb]')
+MANUFACTURER=$(snmpwalk -O qv -t $SNMP_TIMEOUT -v $SNMP_VERSION -c $SNMP_COMMUNITY $IP $OID_MANUFACTURER | sed 's/"//g' | grep --color=never --invert-match "No Such" | grep --color=never --invert-match "no:such")
+if [[ -z "$MANUFACTURER" ]]
+	then
+		OID_MANUFACTURER=$(echo "$OID_MANUFACTURER" | sed 's/\.[0-9]*$//g')
+		MANUFACTURER=$(snmpwalk -O qv -t $SNMP_TIMEOUT -v $SNMP_VERSION -c $SNMP_COMMUNITY $IP $OID_MANUFACTURER | sed 's/"//g' | sort --unique | tr --delete '\n' | grep --color=never --invert-match "No Such" | grep --color=never --invert-match "no:such")
+fi
+if [[ -z "$MANUFACTURER" ]]
+	then
+		OID_MANUFACTURER=$(echo "$OID_MANUFACTURER" | sed 's/\.[0-9]*$//g')
+		MANUFACTURER=$(snmpwalk -O qv -t $SNMP_TIMEOUT -v $SNMP_VERSION -c $SNMP_COMMUNITY $IP $OID_MANUFACTURER | head -n 1 | sed 's/"//g' | grep --color=never --invert-match "No Such" | grep --color=never --invert-match "no:such")
+fi
+if [[ -z "$MANUFACTURER" ]]
+	then
+		OID_MANUFACTURER=$OID_SYSDESCR
+		MANUFACTURER=$(snmpwalk -O qv -t $SNMP_TIMEOUT -v $SNMP_VERSION -c $SNMP_COMMUNITY $IP $OID_MANUFACTURER | egrep --color=never -o '^[A-Za-z0-9-]+\b' | grep --color=never --invert-match "No Such" | grep --color=never --invert-match "no:such")
+fi
+# MANUFACTURER=$(snmpwalk -O qv -t $SNMP_TIMEOUT -v $SNMP_VERSION -c $SNMP_COMMUNITY $IP $OID_MANUFACTURER | grep --color=never --invert-match '""' | head -n 1 | grep --color=never --invert-match "No Such" | grep --color=never --invert-match "no:such" | sed 's/\"//g' | egrep --color=never --invert-match '[Mm][Ii][Bb]')
 if [[ -z "$MANUFACTURER" ]]
 	then
 		MANUFACTURER=$(echo "$SYSDESCR" | egrep --color=never -o '^[A-Za-z0-9-]+,?\s' | sed 's/\s//g' | sed 's/,//g')
 fi
+case $MANUFACTURER
+	in
+		*"UBNT"*|*"ubnt"*|*"Ubnt"*|"US-"*|"us-"*)		MANUFACTURER="Ubiquiti";;
+		*"Hewlet"*|*"hewlet"*)							MANUFACTURER="HP";;
+		*"ExtremeXOS"*|*"extremexos"*|*"Extremexos"*)	MANUFACTURER="Extreme Networks";;
+		*"cisco"*|*"CISCO"*|*"cisco"*)					MANUFACTURER="Cisco";;
+esac
 ROM=
 ROM=$(snmpwalk -O qv -t $SNMP_TIMEOUT -v $SNMP_VERSION -c $SNMP_COMMUNITY $IP $OID_ROM | grep --color=never --invert-match '""' | head -n 1 | grep --color=never --invert-match "No Such" | grep --color=never --invert-match "no:such" | sed 's/\"//g' | sed 's/ //g' | egrep --color=never --invert-match '[Mm][Ii][Bb]')
 DNS_NAME=

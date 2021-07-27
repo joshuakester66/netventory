@@ -164,6 +164,11 @@ OID_LLDP=${OID_ARRAY[0]}
 OID_LLDP_ADDRESS=${OID_ARRAY[1]}
 snmpwalk -t $SNMP_TIMEOUT -v $SNMP_VERSION -c $SNMP_COMMUNITY -O qn $IP $OID_LLDP > $LLDP_INFO_FILE.$IP
 snmpwalk -t $SNMP_TIMEOUT -v $SNMP_VERSION -c $SNMP_COMMUNITY -O qn $IP $OID_LLDP_ADDRESS > $LLDP_ADDRESS_FILE.$IP
+if [[ ! -s "$LLDP_ADDRESS_FILE.$IP" ]]
+	then
+		OID_LLDP_ADDRESS=$(echo "$OID_LLDP_ADDRESS" | sed 's/\.0$//g')
+		snmpwalk -t $SNMP_TIMEOUT -v $SNMP_VERSION -c $SNMP_COMMUNITY -O qn $IP $OID_LLDP_ADDRESS > $LLDP_ADDRESS_FILE.$IP
+fi
 }
 
 GET_INFO ()
@@ -177,16 +182,21 @@ MAC_ADDRESS=
 DESCRIPTION=
 REMOTE_PORT=
 GET_INTERFACE
-DEVICE_NAME=$(cat $LLDP_INFO_FILE.$IP | egrep --color=never -o "\.9\.0\.$INTERFACE\s.+$" | sed "s/^\.9\.0\.$INTERFACE\s//g" | sed 's/\"//g' | sed 's/ $//g')
-IP_ADDRESS=$(cat $LLDP_ADDRESS_FILE.$IP | egrep --color=never -o "\.$INTERFACE\.1\.4\..+\s" | sed "s/\.$INTERFACE\.1\.4\.//g" | sed 's/ //g')
-MAC_ADDRESS=$(cat $LLDP_INFO_FILE.$IP | egrep --color=never -o "\.5\.0\.$INTERFACE\s.+$" | sed "s/^\.5\.0\.$INTERFACE\s//g" | sed 's/\"//g' | sed 's/ $//g' | sed 's/ /:/g' | egrep --color=never '[A-Fa-f0-9]{2}\:[A-Fa-f0-9]{2}\:[A-Fa-f0-9]{2}\:[A-Fa-f0-9]{2}\:[A-Fa-f0-9]{2}\:[A-Fa-f0-9]{2}')
+# DEVICE_NAME=$(cat $LLDP_INFO_FILE.$IP | egrep --color=never -o "\.9\.0\.$INTERFACE\s.+$" | sed "s/^\.9\.0\.$INTERFACE\s//g" | sed 's/\"//g' | sed 's/ $//g')
+DEVICE_NAME=$(cat $LLDP_INFO_FILE.$IP | egrep --color=never -o "\.9\.[0-9]+\.$INTERFACE\s.+$" | sed "s/^\.9\.[0-9]*\.$INTERFACE\s//g" | sed 's/\"//g' | sed 's/ $//g')
+# IP_ADDRESS=$(cat $LLDP_ADDRESS_FILE.$IP | egrep --color=never -o "\.$INTERFACE\.1\.4\..+\s" | sed "s/\.$INTERFACE\.1\.4\.//g" | sed 's/ //g')
+IP_ADDRESS=$(cat $LLDP_ADDRESS_FILE.$IP | egrep --color=never -o "\.$INTERFACE\.1\.4\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\s" | sed "s/\.$INTERFACE\.1\.4\.//g")
+# MAC_ADDRESS=$(cat $LLDP_INFO_FILE.$IP | egrep --color=never -o "\.5\.0\.$INTERFACE\s.+$" | sed "s/^\.5\.0\.$INTERFACE\s//g" | sed 's/\"//g' | sed 's/ $//g' | sed 's/ /:/g' | egrep --color=never '[A-Fa-f0-9]{2}\:[A-Fa-f0-9]{2}\:[A-Fa-f0-9]{2}\:[A-Fa-f0-9]{2}\:[A-Fa-f0-9]{2}\:[A-Fa-f0-9]{2}')
+MAC_ADDRESS=$(cat $LLDP_INFO_FILE.$IP | egrep --color=never -o "\.5\.[0-9]+\.$INTERFACE\s.+$" | sed "s/^\.5\.[0-9]*\.$INTERFACE\s//g" | sed 's/\"//g' | sed 's/ $//g' | sed 's/ /:/g' | egrep --color=never '[A-Fa-f0-9]{2}\:[A-Fa-f0-9]{2}\:[A-Fa-f0-9]{2}\:[A-Fa-f0-9]{2}\:[A-Fa-f0-9]{2}\:[A-Fa-f0-9]{2}')
 if [[ -z "$MAC_ADDRESS" ]]
 	then
-		MAC_ADDRESS=$(cat $LLDP_INFO_FILE.$IP | egrep --color=never -o "\.7\.0\.$INTERFACE\s.+$" | sed "s/^\.7\.0\.$INTERFACE\s//g" | sed 's/\"//g' | sed 's/ $//g' | sed 's/ /:/g' | egrep --color=never '[A-Fa-f0-9]{2}\:[A-Fa-f0-9]{2}\:[A-Fa-f0-9]{2}\:[A-Fa-f0-9]{2}\:[A-Fa-f0-9]{2}\:[A-Fa-f0-9]{2}')
+		# MAC_ADDRESS=$(cat $LLDP_INFO_FILE.$IP | egrep --color=never -o "\.7\.0\.$INTERFACE\s.+$" | sed "s/^\.7\.0\.$INTERFACE\s//g" | sed 's/\"//g' | sed 's/ $//g' | sed 's/ /:/g' | egrep --color=never '[A-Fa-f0-9]{2}\:[A-Fa-f0-9]{2}\:[A-Fa-f0-9]{2}\:[A-Fa-f0-9]{2}\:[A-Fa-f0-9]{2}\:[A-Fa-f0-9]{2}')
+		MAC_ADDRESS=$(cat $LLDP_INFO_FILE.$IP | egrep --color=never -o "\.7\.[0-9]+\.$INTERFACE\s.+$" | sed "s/^\.[0-9]*\.0\.$INTERFACE\s//g" | sed 's/\"//g' | sed 's/ $//g' | sed 's/ /:/g' | egrep --color=never '[A-Fa-f0-9]{2}\:[A-Fa-f0-9]{2}\:[A-Fa-f0-9]{2}\:[A-Fa-f0-9]{2}\:[A-Fa-f0-9]{2}\:[A-Fa-f0-9]{2}')
 fi		
 MAC_ADDRESS=${MAC_ADDRESS,,}
-DESCRIPTION=$(cat $LLDP_INFO_FILE.$IP | egrep --color=never -o "\.10\.0\.$INTERFACE\s.+$" | sed "s/^\.10\.0\.$INTERFACE\s//g" | sed 's/\"//g' | sed 's/ $//g')
-REMOTE_PORT=$(cat $LLDP_INFO_FILE.$IP | egrep --color=never -o "\.8\.0\.$INTERFACE\s.+$" | sed "s/^\.8\.0\.$INTERFACE\s//g" | sed 's/\"//g' | sed 's/ $//g')
+# DESCRIPTION=$(cat $LLDP_INFO_FILE.$IP | egrep --color=never -o "\.10\.[0-9]+\.$INTERFACE\s.+$" | sed "s/^\.10\.[0-9]*\.$INTERFACE\s//g" | sed 's/\"//g' | sed 's/ $//g')
+DESCRIPTION=$(cat $LLDP_INFO_FILE.$IP | egrep --color=never -o "\.10\.[0-9]+\.$INTERFACE\s.+$" | sed "s/^\.10\.[0-9]*\.$INTERFACE\s//g" | sed 's/\"//g' | sed 's/\s*$//g' | sed 's/^\s*//g')
+REMOTE_PORT=$(cat $LLDP_INFO_FILE.$IP | egrep --color=never -o "\.8\.[0-9]+\.$INTERFACE\s.+$" | sed "s/^\.8\.[0-9]*\.$INTERFACE\s//g" | sed 's/\"//g' | sed 's/ $//g')
 echo -e "`date +%b\ %d\ %Y\ %H:%M:%S`: ${CYANF}Local Device: $LOCAL_DEVICE"${RESET} >> $LOG
 echo -e "`date +%b\ %d\ %Y\ %H:%M:%S`: ${CYANF}Device ID: $DEVICE_ID"${RESET} >> $LOG
 echo -e "`date +%b\ %d\ %Y\ %H:%M:%S`: ${CYANF}Local Port: $LOCAL_PORT"${RESET} >> $LOG
@@ -276,10 +286,11 @@ for IP in $IPS
 				GET_DEVICE_ID
 				GET_SNMP_CREDS
 				GET_LLDP
-				INTERFACES=$(cat $LLDP_INFO_FILE.$IP | egrep --color=never -o '\.4\.0\.[0-9]+\.[0-9]+\s' | sed 's/\s$//g' | sed 's/^\.4\.0\.//g')
+				# INTERFACES=$(cat $LLDP_INFO_FILE.$IP | egrep --color=never -o '\.4\.0\.[0-9]+\.[0-9]+\s' | sed 's/\s$//g' | sed 's/^\.4\.0\.//g')
+				INTERFACES=$(cat $LLDP_INFO_FILE.$IP | egrep --color=never -o '\.[0-9]+\.[0-9]+\s+"' | sed 's/\s*"//g' | sed 's/^\.//g' | sort --unique)
 				for INTERFACE in $INTERFACES
 					do
-						echo "`date +%b\ %d\ %Y\ %H:%M:%S`: ==========" >> $LOG
+						echo "`date +%b\ %d\ %Y\ %H:%M:%S`: ===" >> $LOG
 						echo -e "`date +%b\ %d\ %Y\ %H:%M:%S`: ${CYANF}Checking on interface $INTERFACE"${RESET} >> $LOG
 						GET_INFO
 						DATABASE_EXIST=

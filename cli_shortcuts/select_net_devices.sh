@@ -5,8 +5,6 @@
 #Requirements:
 # Credentials file located at $HOME/scripts/.credentials
 #Packages:
-# openldap-clients.x86_64
-# expect-tcl
 
 # read -p "Press any key to continue. " DEBUG #DEBUG
 
@@ -24,7 +22,7 @@ CREDENTIALS="$HOME/scripts/.credentials"
 DATABASE_USERNAME=$(cat $CREDENTIALS | grep mysql_username: | sed 's/mysql_username://g')
 DATABASE_PASSWORD=$(cat $CREDENTIALS | grep mysql_password: | sed 's/mysql_password://g')
 LOCAL_DATABASE="netventory"
-LOCAL_TABLE="device"
+LOCAL_TABLE="device_brief_view"
 WORKING_DIR="$HOME/scripts/tmp/$SCRIPT_NAME"
 SCRIPT_DIR="$HOME/scripts/$SCRIPT_CAT"
 LOCK_FILE="$WORKING_DIR/$SCRIPT_NAME.lock"
@@ -79,7 +77,7 @@ exit $EXIT_CODE
 
 SELECT_DATABASE ()
 {
-mysql --user=$DATABASE_USERNAME --password=$DATABASE_PASSWORD --silent -e "SELECT id,ip,mac,hostname,sysname,dns_name,syslocation,manufacturer,oui,category,type FROM $LOCAL_DATABASE.$LOCAL_TABLE WHERE $CRITERIA;"
+mysql --user=$DATABASE_USERNAME --password=$DATABASE_PASSWORD --silent -e "SELECT * FROM $LOCAL_DATABASE.$LOCAL_TABLE WHERE $CRITERIA LIMIT 1000;"
 }
 
 trap CTRL_C SIGINT

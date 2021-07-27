@@ -187,7 +187,7 @@ for OID_ID in $OID_IDS
 		DEVICE_MANUFACTURER=$(echo "$DEVICE_MANUFACTURER" | sed 's/_/ /g')
 		echo -e "`date +%b\ %d\ %Y\ %H:%M:%S`: ${CYANF}Updating the $CURRENT_TABLE table with a manufacturer of $DEVICE_MANUFACTURER and a type of $DEVICE_TYPE with an OID ID of $OID_ID"${RESET} >> $LOG
 		mysql --user=$DATABASE_USERNAME --password=$DATABASE_PASSWORD $LOCAL_DATABASE << EOF
-UPDATE $CURRENT_TABLE set oid_id='$OID_ID' WHERE manufacturer='$DEVICE_MANUFACTURER' AND type='$DEVICE_TYPE';
+UPDATE $CURRENT_TABLE set oid_id='$OID_ID' WHERE manufacturer LIKE'$DEVICE_MANUFACTURER' AND type='$DEVICE_TYPE';
 EOF
 done
 }
@@ -498,8 +498,8 @@ for CURRENT_TABLE in $DEVICE_TABLES
 		echo -e "`date +%b\ %d\ %Y\ %H:%M:%S`: ${CYANF}Working on the $CURRENT_TABLE table"${RESET} >> $LOG
 		CHECK_MAC
 		UPDATE_OUI
-		UPDATE_OIDS
 		DEVICE_CLEANUP
+		UPDATE_OIDS
 done
 DEVICE2ENDPOINT
 ENDPOINT2DEVICE
